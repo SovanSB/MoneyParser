@@ -35,11 +35,7 @@ public class AsyncTaskLoader extends CursorLoader {
                 values.addAll(cat.toValuesList(-1));
             }
             final ContentValues[] bulkCategories = values.toArray(new ContentValues[values.size()]);
-//                    final ContentValues[] bulkCategories = new ContentValues[categories.size()];
-//
-//                    for (int i = 0; i < categories.size(); ++i) {
-//                        bulkCategories[i] = categories.get(i).toValues();
-//                    }
+
             ContentResolver db = getContext().getContentResolver();
             // Clearing base before refreshing
             db.delete(CategoryItem.URI, null, null);
@@ -48,7 +44,6 @@ public class AsyncTaskLoader extends CursorLoader {
         } catch (RetrofitError e) {
             Log.e("Retrofit", e.getMessage(), e);
         }
-
 
         return super.loadInBackground();
     }

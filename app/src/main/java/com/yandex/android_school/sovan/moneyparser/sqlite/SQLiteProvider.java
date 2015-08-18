@@ -17,7 +17,7 @@ public class SQLiteProvider extends ContentProvider {
 
     private static final String DATABASE_NAME="categories.db";
 
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 8;
 
     private SQLiteHelperImpl mHelper;
 

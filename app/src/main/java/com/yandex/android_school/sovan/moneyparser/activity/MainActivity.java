@@ -5,7 +5,9 @@ import android.app.LoaderManager;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.yandex.android_school.sovan.moneyparser.R;
@@ -35,19 +38,35 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
 
     private ListView mListView;
     private CategoryAdapter mCategoryAdapter;
+
+    private Button mButton;
+
     private Stack<Long> mParentIdStack;
     private Stack<Integer> mPositionStack;
+
+    // Shared Preferences file name
+    public static final String APP_PREFERENCES = "mysettings";
+    // Shared preferences parameter name
+    public static final String APP_PREFERENCES_LOADED = "loaded";
+
+    SharedPreferences mSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mButton = (Button) findViewById(R.id.btn_back);
+        mButton.setVisibility(View.GONE);
         mListView = (ListView) findViewById(R.id.listView);
         mCategoryAdapter = new CategoryAdapter(this, null);
         mListView.setAdapter(mCategoryAdapter);
         mParentIdStack = new Stack<Long>();
         mPositionStack = new Stack<Integer>();
-        getLoaderManager().initLoader(R.id.category_manager, Bundle.EMPTY, this);
+        mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
+        if (!mSettings.getBoolean(APP_PREFERENCES_LOADED, false)) {
+            getLoaderManager().initLoader(R.id.category_manager, Bundle.EMPTY, this);
+        }
+        onFilterClick(null);
     }
 
 
@@ -86,6 +105,13 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
             Cursor dataFiltered = db.query(CategoryItem.URI, null, CategoryItem.Columns.PARENT_ID + "=?",
                     new String[]{"-1"}, null);
             mCategoryAdapter.swapCursor(dataFiltered);
+            mParentIdStack.clear();
+            mPositionStack.clear();
+            mButton.setVisibility(View.GONE);
+            SharedPreferences.Editor editor = mSettings.edit();
+            editor.putBoolean(APP_PREFERENCES_LOADED, true);
+            editor.apply();
+            Log.d("Loader", "finished");
         }
     }
 
@@ -116,59 +142,67 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
         ContentResolver db = getContentResolver();
         Cursor data = db.query(CategoryItem.URI, null, CategoryItem.Columns.PARENT_ID + "=?",
                 new String[]{Long.toString(parentId)}, null);
+        // If there are subs, we form stacks and go deeper
         if (data.getCount() > 0) {
+
             mParentIdStack.add(previousId);
-            mPositionStack.add(position);
+            mPositionStack.add(parent.getLastVisiblePosition());
+            mButton.setVisibility(View.VISIBLE);
             mCategoryAdapter.swapCursor(data);
         }
     }
 
-    public void onAddClick(View view) {
-        ContentResolver db = getContentResolver();
-        CategoryItem item1 = new CategoryItem(1, "Test1", null);
-        db.insert(CategoryItem.URI, item1.toValues());
-    }
+//    public void onAddClick(View view) {
+//        ContentResolver db = getContentResolver();
+//        CategoryItem item1 = new CategoryItem(1, "Test1", null);
+//        db.insert(CategoryItem.URI, item1.toValues());
+//    }
 
-    public void onClearClick(View view) {
-        ContentResolver db = getContentResolver();
-        db.delete(CategoryItem.URI, null, null);
-
-    }
+//    public void onClearClick(View view) {
+//        ContentResolver db = getContentResolver();
+//        db.delete(CategoryItem.URI, null, null);
+//        SharedPreferences.Editor editor = mSettings.edit();
+//        editor.putBoolean(APP_PREFERENCES_LOADED, false);
+//        editor.apply();
+//
+//    }
 
     public void onListClick(View view) {
 
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
+        getLoaderManager().initLoader(R.id.category_manager, Bundle.EMPTY, this);
 
-                    RestAdapter restAdapter = new RestAdapter.Builder()
-                            .setEndpoint("https://money.yandex.ru")
-                            .build();
-                    MoneyService service = restAdapter.create(MoneyService.class);
-                    List<CategoryItem> categories = service.getCategories();
-                    List<ContentValues> values = new ArrayList<ContentValues>();
-                    for (CategoryItem cat : categories) {
-                        values.addAll(cat.toValuesList(-1));
-                    }
-                    final ContentValues[] bulkCategories = values.toArray(new ContentValues[values.size()]);
-//                    final ContentValues[] bulkCategories = new ContentValues[categories.size()];
+//        Thread t = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
 //
-//                    for (int i = 0; i < categories.size(); ++i) {
-//                        bulkCategories[i] = categories.get(i).toValues();
+//                    RestAdapter restAdapter = new RestAdapter.Builder()
+//                            .setEndpoint("https://money.yandex.ru")
+//                            .build();
+//                    MoneyService service = restAdapter.create(MoneyService.class);
+//                    List<CategoryItem> categories = service.getCategories();
+//                    List<ContentValues> values = new ArrayList<ContentValues>();
+//                    for (CategoryItem cat : categories) {
+//                        values.addAll(cat.toValuesList(-1));
 //                    }
-                    ContentResolver db = getContentResolver();
-                    // Clearing base before refreshing
-                    db.delete(CategoryItem.URI, null, null);
-                    db.bulkInsert(CategoryItem.URI, bulkCategories);
-
-                } catch (RetrofitError e) {
-                    Log.e("Retrofit", e.getMessage(), e);
-                }
-            }
-
-        });
-        t.start();
+//                    final ContentValues[] bulkCategories = values.toArray(new ContentValues[values.size()]);
+////                    final ContentValues[] bulkCategories = new ContentValues[categories.size()];
+////
+////                    for (int i = 0; i < categories.size(); ++i) {
+////                        bulkCategories[i] = categories.get(i).toValues();
+////                    }
+//                    ContentResolver db = getContentResolver();
+//                    // Clearing base before refreshing
+//                    db.delete(CategoryItem.URI, null, null);
+//                    db.bulkInsert(CategoryItem.URI, bulkCategories);
+//
+//                } catch (RetrofitError e) {
+//                    Log.e("Retrofit", e.getMessage(), e);
+//                }
+//            }
+//
+//        });
+//        t.start();
     }
 
     public void onFilterClick(View view) {
@@ -176,6 +210,9 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
         Cursor data = db.query(CategoryItem.URI, null, CategoryItem.Columns.PARENT_ID + "=?",
                 new String[]{"-1"}, null);
         mCategoryAdapter.swapCursor(data);
+        mParentIdStack.clear();
+        mPositionStack.clear();
+        mButton.setVisibility(View.GONE);
     }
 
     public void onBackClick(View view) {
@@ -185,8 +222,9 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
                     new String[]{mParentIdStack.pop().toString()}, null);
             mCategoryAdapter.swapCursor(data);
             mListView.smoothScrollToPosition(mPositionStack.pop());
-
-
+        }
+        if (mParentIdStack.empty()) {
+            mButton.setVisibility(View.GONE);
         }
     }
 }

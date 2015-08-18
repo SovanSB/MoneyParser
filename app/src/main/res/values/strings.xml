@@ -4,5 +4,7 @@
     <string name="app_name">MoneyParser</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="btn_reset">Reset</string>
+    <string name="btn_back">Back</string>
 
 </resources>
