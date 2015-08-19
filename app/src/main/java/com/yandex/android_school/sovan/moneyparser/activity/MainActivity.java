@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.yandex.android_school.sovan.moneyparser.R;
 import com.yandex.android_school.sovan.moneyparser.adapter.CategoryAdapter;
@@ -44,10 +45,15 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
     private Stack<Long> mParentIdStack;
     private Stack<Integer> mPositionStack;
 
+    private long mCurrentParent = R.id.ROOT_PARENT;
+    private int mPosition = 0;
+
     // Shared Preferences file name
     public static final String APP_PREFERENCES = "mysettings";
-    // Shared preferences parameter name
+    // Shared preferences parameter names
     public static final String APP_PREFERENCES_LOADED = "loaded";
+    public static final String APP_PREFERENCES_PARENT = "parent";
+    public static final String APP_PREFERENCES_POSITION = "postition";
 
     SharedPreferences mSettings;
 
@@ -63,12 +69,22 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
         mParentIdStack = new Stack<Long>();
         mPositionStack = new Stack<Integer>();
         mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
+        mCurrentParent = mSettings.getLong(APP_PREFERENCES_PARENT, R.id.ROOT_PARENT);
+        mPosition = mSettings.getInt(APP_PREFERENCES_POSITION, 0);
         if (!mSettings.getBoolean(APP_PREFERENCES_LOADED, false)) {
             getLoaderManager().initLoader(R.id.category_manager, Bundle.EMPTY, this);
         }
-        onFilterClick(null);
+        jumpTo(mCurrentParent, mPosition);
     }
 
+    @Override
+    protected void onDestroy() {
+        SharedPreferences.Editor editor = mSettings.edit();
+        editor.putInt(APP_PREFERENCES_POSITION, mListView.getLastVisiblePosition());
+        editor.putLong(APP_PREFERENCES_PARENT, mCurrentParent);
+        editor.apply();
+        super.onDestroy();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -101,13 +117,15 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (loader.getId() == R.id.category_manager) {
-            ContentResolver db = getContentResolver();
-            Cursor dataFiltered = db.query(CategoryItem.URI, null, CategoryItem.Columns.PARENT_ID + "=?",
-                    new String[]{"-1"}, null);
-            mCategoryAdapter.swapCursor(dataFiltered);
-            mParentIdStack.clear();
-            mPositionStack.clear();
-            mButton.setVisibility(View.GONE);
+            jumpTo(mCurrentParent, mPosition);
+//            ContentResolver db = getContentResolver();
+//            Cursor dataFiltered = db.query(CategoryItem.URI, null, CategoryItem.Columns.PARENT_ID + "=?",
+//                    new String[]{Long.toString(R.id.ROOT_PARENT)}, null);
+//            mCategoryAdapter.swapCursor(dataFiltered);
+//            mParentIdStack.clear();
+//            mPositionStack.clear();
+//            mButton.setVisibility(View.GONE);
+            Toast.makeText(getApplicationContext(), "Database updated", Toast.LENGTH_SHORT).show();
             SharedPreferences.Editor editor = mSettings.edit();
             editor.putBoolean(APP_PREFERENCES_LOADED, true);
             editor.apply();
@@ -147,6 +165,8 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
 
             mParentIdStack.add(previousId);
             mPositionStack.add(parent.getLastVisiblePosition());
+            mCurrentParent = parentId;
+            mPosition = parent.getLastVisiblePosition();
             mButton.setVisibility(View.VISIBLE);
             mCategoryAdapter.swapCursor(data);
         }
@@ -206,22 +226,30 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
     }
 
     public void onFilterClick(View view) {
-        ContentResolver db = getContentResolver();
-        Cursor data = db.query(CategoryItem.URI, null, CategoryItem.Columns.PARENT_ID + "=?",
-                new String[]{"-1"}, null);
-        mCategoryAdapter.swapCursor(data);
+        jumpTo(R.id.ROOT_PARENT, 0);
         mParentIdStack.clear();
         mPositionStack.clear();
         mButton.setVisibility(View.GONE);
     }
 
+    private void jumpTo(long parentID, int position) {
+        ContentResolver db = getContentResolver();
+        Cursor data = db.query(CategoryItem.URI, null, CategoryItem.Columns.PARENT_ID + "=?",
+                new String[]{Long.toString(parentID)}, null);
+        mCategoryAdapter.swapCursor(data);
+        mCurrentParent = parentID;
+        mPosition = position;
+        mListView.smoothScrollToPosition(position);
+    }
+
     public void onBackClick(View view) {
         if (!mParentIdStack.empty()) {
-            ContentResolver db = getContentResolver();
-            Cursor data = db.query(CategoryItem.URI, null, CategoryItem.Columns.PARENT_ID + "=?",
-                    new String[]{mParentIdStack.pop().toString()}, null);
-            mCategoryAdapter.swapCursor(data);
-            mListView.smoothScrollToPosition(mPositionStack.pop());
+            jumpTo(mParentIdStack.pop(),mPositionStack.pop());
+//            ContentResolver db = getContentResolver();
+//            Cursor data = db.query(CategoryItem.URI, null, CategoryItem.Columns.PARENT_ID + "=?",
+//                    new String[]{mParentIdStack.pop().toString()}, null);
+//            mCategoryAdapter.swapCursor(data);
+//            mListView.smoothScrollToPosition(mPositionStack.pop());
         }
         if (mParentIdStack.empty()) {
             mButton.setVisibility(View.GONE);

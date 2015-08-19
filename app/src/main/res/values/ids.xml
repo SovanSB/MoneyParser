@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="category_manager" type="id">15616</item>
+    <item name="ROOT_PARENT" type="id">-1</item>
 </resources>

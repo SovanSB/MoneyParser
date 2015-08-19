@@ -1,0 +1,44 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                tools:context=".MainActivity">
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/listView"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/btn_refresh"/>
+
+    <Button
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:id="@+id/btn_refresh"
+        android:onClick="onListClick"
+        android:background="@drawable/refresh"
+        />
+
+    <Button
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:id="@+id/btn_back"
+        android:layout_alignParentLeft="true"
+        android:onClick="onBackClick"
+        android:background="@drawable/back"
+        android:layout_below="@+id/btn_home"
+        />
+
+    <Button
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:id="@+id/btn_home"
+        android:onClick="onFilterClick"
+        android:background="@drawable/home2"
+        android:layout_below="@+id/btn_refresh"
+        android:layout_alignParentLeft="true"/>
+</RelativeLayout>

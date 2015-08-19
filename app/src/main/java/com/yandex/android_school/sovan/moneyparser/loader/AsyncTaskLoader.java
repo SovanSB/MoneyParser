@@ -7,6 +7,7 @@ import android.content.CursorLoader;
 import android.database.Cursor;
 import android.util.Log;
 
+import com.yandex.android_school.sovan.moneyparser.R;
 import com.yandex.android_school.sovan.moneyparser.api.MoneyService;
 import com.yandex.android_school.sovan.moneyparser.categories.CategoryItem;
 
@@ -32,7 +33,7 @@ public class AsyncTaskLoader extends CursorLoader {
             List<CategoryItem> categories = service.getCategories();
             List<ContentValues> values = new ArrayList<ContentValues>();
             for (CategoryItem cat : categories) {
-                values.addAll(cat.toValuesList(-1));
+                values.addAll(cat.toValuesList(R.id.ROOT_PARENT));
             }
             final ContentValues[] bulkCategories = values.toArray(new ContentValues[values.size()]);
 
