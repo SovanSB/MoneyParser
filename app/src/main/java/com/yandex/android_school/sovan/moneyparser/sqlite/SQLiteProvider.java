@@ -10,14 +10,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
-/**
- * Created by Sovan on 09.08.2015.
- */
+
 public class SQLiteProvider extends ContentProvider {
 
     private static final String DATABASE_NAME="categories.db";
 
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 10;
 
     private SQLiteHelperImpl mHelper;
 
@@ -31,8 +29,8 @@ public class SQLiteProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] columns, String where, String[] whereArgs, String orderBy) {
         final int match = SQLiteUriMatcher.match(uri);
         switch (match) {
-            case SQLiteUriMatcher.MATCH_ID:
-                return selectById(uri, columns);
+//            case SQLiteUriMatcher.MATCH_ID:
+//                return selectById(uri, columns);
             case SQLiteUriMatcher.MATCH_ALL:
                 return selectAll(uri, columns, where, whereArgs, orderBy);
             default:
@@ -44,8 +42,8 @@ public class SQLiteProvider extends ContentProvider {
     public String getType(Uri uri) {
         final int match = SQLiteUriMatcher.match(uri);
         switch (match) {
-            case SQLiteUriMatcher.MATCH_ID:
-                return "vnd.android.cursor.item/" + uri.getPathSegments().get(0);
+//            case SQLiteUriMatcher.MATCH_ID:
+//                return "vnd.android.cursor.item/" + uri.getPathSegments().get(0);
             case SQLiteUriMatcher.MATCH_ALL:
                 return "vnd.android.cursor.dir/" + uri.getPathSegments().get(0);
             default:
@@ -111,9 +109,9 @@ public class SQLiteProvider extends ContentProvider {
         return cursor;
     }
 
-    private Cursor selectById(Uri uri, String[] columns) {
-        return selectAll(uri, columns, BaseColumns._ID + "=?", new String[]{uri.getLastPathSegment()}, null);
-    }
+//    private Cursor selectById(Uri uri, String[] columns) {
+//        return selectAll(uri, columns, BaseColumns._ID + "=?", new String[]{uri.getLastPathSegment()}, null);
+//    }
 
     public Uri insert(Uri uri, ContentValues values, boolean notify) {
         final long lastInsertRowid = mHelper.getWritableDatabase().insert(
@@ -142,7 +140,7 @@ public class SQLiteProvider extends ContentProvider {
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL("CREATE TABLE IF NOT EXISTS tasks(_id INTEGER PRIMARY KEY, title TEXT, " +
-                    "id INTEGER, sub_ids TEXT, sub_number INTEGER, sub_names TEXT, " +
+                    "id INTEGER, sub_ids TEXT, sub_names TEXT, " +
                     "parent_id INTEGER, hash_code INTEGER);");
         }
 

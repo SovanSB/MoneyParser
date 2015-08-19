@@ -13,9 +13,7 @@ import com.yandex.android_school.sovan.moneyparser.categories.CategoryItem;
 
 import java.util.Objects;
 
-/**
- * Created by Sovan on 09.08.2015.
- */
+
 public class CategoryAdapter extends ResourceCursorAdapter {
     public CategoryAdapter(Context context, Cursor c) {
         super(context,  R.layout.li_item, c,
@@ -26,15 +24,19 @@ public class CategoryAdapter extends ResourceCursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         ((TextView)view.findViewById(R.id.textViewTitle)).
                 setText(cursor.getString(cursor.getColumnIndex(CategoryItem.Columns.TITLE)));
+
+        // If CategoryItem had no id, it was set to 0, but it isn't real, so we don't display it
         long itemId = cursor.getLong(cursor.getColumnIndex(CategoryItem.Columns.ID));
         if (itemId != 0) {
             ((TextView) view.findViewById(R.id.textViewId)).setVisibility(View.VISIBLE);
             ((TextView) view.findViewById(R.id.textViewId)).setText(Long.toString(itemId));
         }
         else {
-            ((TextView) view.findViewById(R.id.textViewId)).setVisibility(View.GONE);;
+            ((TextView) view.findViewById(R.id.textViewId)).setVisibility(View.GONE);
         }
         final String subs = cursor.getString(cursor.getColumnIndex(CategoryItem.Columns.SUB_NAMES));
+
+        // If CategoryItem has no subs, we don't display this view to save place
         if (TextUtils.isEmpty(subs)) {
             ((TextView) view.findViewById(R.id.textViewSubs)).setVisibility(View.GONE);
         }

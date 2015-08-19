@@ -17,9 +17,6 @@ import java.util.Collections;
 import java.util.ListIterator;
 
 
-/**
- * Created by Sovan on 10.08.2015.
- */
 
 public class CategoryItem implements Serializable {
 
@@ -30,7 +27,7 @@ public class CategoryItem implements Serializable {
     private String title;
     private List<CategoryItem> subs;
     private long mParentId;
-    private int subNumber;
+ //   private int subNumber;  // number of subs.. isn't really used here, but was left not to lose information
     private String subIds;
     private String subNames;
  //   private long mHashCode;
@@ -40,25 +37,17 @@ public class CategoryItem implements Serializable {
         this.id = id;
         this.title = title;
 //        this.mHashCode = hashCode();
-        int tempSubNumber = 0;
+
+//        int tempSubNumber = 0; // counts number of subs
 //        this.subs = mSubs;
         if (subs == null) {
             subs = Collections.<CategoryItem>emptyList();
         }
         this.subs = subs;
 
-        StringBuilder stringBuilder = new StringBuilder();
-        for (CategoryItem sub : subs) {
-            tempSubNumber++;
-            if (stringBuilder.length() > 0) {
-                stringBuilder.append(" ");
-            }
-            stringBuilder.append(sub.getId());
-            // TODO: Test this!!!
-            sub.mParentId = this.hashFunction();
-        }
-        this.subNumber = tempSubNumber;
-        this.subIds = stringBuilder.toString();
+        String[] subFields = checkSubs(subs, this.hashFunction());
+        this.subNames = subFields[0];
+        this.subIds = subFields[1];
 
     }
 
@@ -87,19 +76,10 @@ public class CategoryItem implements Serializable {
             subs = Collections.<CategoryItem>emptyList();
         }
         this.subs = subs;
-        int tempSubNumber = 0;
-        StringBuilder stringBuilder = new StringBuilder();
-        for (CategoryItem sub : subs) {
-            tempSubNumber++;
-            if (stringBuilder.length() > 0) {
-                stringBuilder.append(" ");
-            }
-            stringBuilder.append(sub.getId());
-            // TODO: Test this!!!
-            sub.mParentId = this.hashFunction();
-        }
-        this.subNumber = tempSubNumber;
-        this.subIds = stringBuilder.toString();
+//        int tempSubNumber = 0;
+        String[] subFields = checkSubs(subs, this.hashFunction());
+        this.subNames = subFields[0];
+        this.subIds = subFields[1];
     }
 
     public long getParentId() {
@@ -110,36 +90,27 @@ public class CategoryItem implements Serializable {
         mParentId = parentId;
     }
 
-    public int getSubNumber() {
-        return subNumber;
-    }
+ //   public int getSubNumber() {
+//        return subNumber;
+//    }
 
     public String getSubNames() {
         return subNames;
     }
 
-    //    public void setSubNumber(int subNumber) {
-//        this.subNumber = subNumber;
-//    }
-
     public String getSubIds() {
         return subIds;
     }
-
-//    public void setSubIds(String subIds) {
-//        this.subIds = subIds;
-//    }
 
     public static interface Columns extends BaseColumns {
         String ID="id";
         String TITLE="title";
         String SUB_IDS="sub_ids";
-        String SUB_NUMBER="sub_number";
+  //      String SUB_NUMBER="sub_number";
         String SUB_NAMES="sub_names";
         String PARENT_ID="parent_id";
         String HASH_CODE="hash_code";
     }
-
 
     public long hashFunction() {
         return this.getTitle().hashCode() + 17 * this.getId();
@@ -150,31 +121,16 @@ public class CategoryItem implements Serializable {
             subs = Collections.<CategoryItem>emptyList();
         }
 
-        int tempSubNumber = 0;
-        StringBuilder stringNumberBuilder = new StringBuilder();
-        StringBuilder stringTitleBuilder = new StringBuilder();
-        for (CategoryItem sub : subs) {
-            tempSubNumber++;
-            if (stringNumberBuilder.length() > 0) {
-                stringNumberBuilder.append("\n");
-            }
-            if (stringTitleBuilder.length() > 0) {
-                stringTitleBuilder.append("\n");
-            }
-            stringNumberBuilder.append(sub.getId());
-            stringTitleBuilder.append(sub.getTitle());
-            // TODO: Test this!!!
-            sub.mParentId = this.hashFunction();
-        }
-        this.subNumber = tempSubNumber;
-        this.subNames = stringTitleBuilder.toString();
-        this.subIds = stringNumberBuilder.toString();
+
+        String[] subFields = checkSubs(subs, this.hashFunction());
+        this.subNames = subFields[0];
+        this.subIds = subFields[1];
 
         final ContentValues values = new ContentValues();
         values.put(Columns.ID, id);
         values.put(Columns.TITLE, title);
         values.put(Columns.SUB_IDS, subIds);
-        values.put(Columns.SUB_NUMBER, subNumber);
+ //       values.put(Columns.SUB_NUMBER, subNumber);
         values.put(Columns.SUB_NAMES, subNames);
         values.put(Columns.PARENT_ID, mParentId);
         values.put(Columns.HASH_CODE, hashFunction());
@@ -189,6 +145,23 @@ public class CategoryItem implements Serializable {
             valuesList.addAll(sub.toValuesList(this.hashFunction()));
         }
         return valuesList;
+    }
+
+    public String[] checkSubs(List<CategoryItem> subs, long parent) {
+        StringBuilder stringNumberBuilder = new StringBuilder();
+        StringBuilder stringTitleBuilder = new StringBuilder();
+        for (CategoryItem sub : subs) {
+            if (stringNumberBuilder.length() > 0) {
+                stringNumberBuilder.append("\n");
+            }
+            if (stringTitleBuilder.length() > 0) {
+                stringTitleBuilder.append("\n");
+            }
+            stringNumberBuilder.append(sub.getId());
+            stringTitleBuilder.append(sub.getTitle());
+            sub.mParentId = parent;
+        }
+        return new String[]{stringTitleBuilder.toString(), stringNumberBuilder.toString()};
     }
 
 }
