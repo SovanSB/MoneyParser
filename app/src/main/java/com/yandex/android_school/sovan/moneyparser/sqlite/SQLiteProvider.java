@@ -29,8 +29,6 @@ public class SQLiteProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] columns, String where, String[] whereArgs, String orderBy) {
         final int match = SQLiteUriMatcher.match(uri);
         switch (match) {
-//            case SQLiteUriMatcher.MATCH_ID:
-//                return selectById(uri, columns);
             case SQLiteUriMatcher.MATCH_ALL:
                 return selectAll(uri, columns, where, whereArgs, orderBy);
             default:
@@ -42,8 +40,6 @@ public class SQLiteProvider extends ContentProvider {
     public String getType(Uri uri) {
         final int match = SQLiteUriMatcher.match(uri);
         switch (match) {
-//            case SQLiteUriMatcher.MATCH_ID:
-//                return "vnd.android.cursor.item/" + uri.getPathSegments().get(0);
             case SQLiteUriMatcher.MATCH_ALL:
                 return "vnd.android.cursor.dir/" + uri.getPathSegments().get(0);
             default:
@@ -108,10 +104,6 @@ public class SQLiteProvider extends ContentProvider {
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
         return cursor;
     }
-
-//    private Cursor selectById(Uri uri, String[] columns) {
-//        return selectAll(uri, columns, BaseColumns._ID + "=?", new String[]{uri.getLastPathSegment()}, null);
-//    }
 
     public Uri insert(Uri uri, ContentValues values, boolean notify) {
         final long lastInsertRowid = mHelper.getWritableDatabase().insert(

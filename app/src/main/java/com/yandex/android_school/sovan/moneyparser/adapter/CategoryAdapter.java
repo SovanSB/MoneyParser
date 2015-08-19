@@ -36,7 +36,7 @@ public class CategoryAdapter extends ResourceCursorAdapter {
         }
         final String subs = cursor.getString(cursor.getColumnIndex(CategoryItem.Columns.SUB_NAMES));
 
-        // If CategoryItem has no subs, we don't display this view to save place
+        // If CategoryItem has no subs, we don't display that view to save some place
         if (TextUtils.isEmpty(subs)) {
             ((TextView) view.findViewById(R.id.textViewSubs)).setVisibility(View.GONE);
         }

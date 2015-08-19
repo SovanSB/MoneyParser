@@ -26,25 +26,23 @@ public class CategoryItem implements Serializable {
     private long id;
     private String title;
     private List<CategoryItem> subs;
+
     private long mParentId;
- //   private int subNumber;  // number of subs.. isn't really used here, but was left not to lose information
-    private String subIds;
-    private String subNames;
- //   private long mHashCode;
+    private String subIds;  // Stores hash codes of all subs
+    private String subNames; // Stores titles of all subs
+
 
 
     public CategoryItem(long id, String title, List<CategoryItem> subs) {
         this.id = id;
         this.title = title;
-//        this.mHashCode = hashCode();
 
-//        int tempSubNumber = 0; // counts number of subs
-//        this.subs = mSubs;
         if (subs == null) {
             subs = Collections.<CategoryItem>emptyList();
         }
         this.subs = subs;
 
+        // Collects information about subs and fills fields
         String[] subFields = checkSubs(subs, this.hashFunction());
         this.subNames = subFields[0];
         this.subIds = subFields[1];
@@ -76,7 +74,6 @@ public class CategoryItem implements Serializable {
             subs = Collections.<CategoryItem>emptyList();
         }
         this.subs = subs;
-//        int tempSubNumber = 0;
         String[] subFields = checkSubs(subs, this.hashFunction());
         this.subNames = subFields[0];
         this.subIds = subFields[1];
@@ -90,10 +87,6 @@ public class CategoryItem implements Serializable {
         mParentId = parentId;
     }
 
- //   public int getSubNumber() {
-//        return subNumber;
-//    }
-
     public String getSubNames() {
         return subNames;
     }
@@ -106,7 +99,6 @@ public class CategoryItem implements Serializable {
         String ID="id";
         String TITLE="title";
         String SUB_IDS="sub_ids";
-  //      String SUB_NUMBER="sub_number";
         String SUB_NAMES="sub_names";
         String PARENT_ID="parent_id";
         String HASH_CODE="hash_code";
@@ -116,12 +108,13 @@ public class CategoryItem implements Serializable {
         return this.getTitle().hashCode() + 17 * this.getId();
     }
 
+    // Converts current object to ContentValue object
     public ContentValues toValues() {
         if (subs == null) {
             subs = Collections.<CategoryItem>emptyList();
         }
 
-
+        // Gathers information about subs before doing that
         String[] subFields = checkSubs(subs, this.hashFunction());
         this.subNames = subFields[0];
         this.subIds = subFields[1];
@@ -130,13 +123,13 @@ public class CategoryItem implements Serializable {
         values.put(Columns.ID, id);
         values.put(Columns.TITLE, title);
         values.put(Columns.SUB_IDS, subIds);
- //       values.put(Columns.SUB_NUMBER, subNumber);
         values.put(Columns.SUB_NAMES, subNames);
         values.put(Columns.PARENT_ID, mParentId);
         values.put(Columns.HASH_CODE, hashFunction());
         return values;
     }
 
+    // Recursively collects information about current object and all subs, and adds them to the list
     public List<ContentValues> toValuesList(long parent) {
         this.mParentId = parent;
         List<ContentValues> valuesList = new ArrayList<ContentValues>();
@@ -147,6 +140,7 @@ public class CategoryItem implements Serializable {
         return valuesList;
     }
 
+    // Function that gathers information about subs
     public String[] checkSubs(List<CategoryItem> subs, long parent) {
         StringBuilder stringNumberBuilder = new StringBuilder();
         StringBuilder stringTitleBuilder = new StringBuilder();

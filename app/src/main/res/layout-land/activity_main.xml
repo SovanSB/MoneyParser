@@ -16,16 +16,16 @@
         android:layout_toRightOf="@+id/btn_refresh"/>
 
     <Button
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="@dimen/button_size"
+        android:layout_height="@dimen/button_size"
         android:id="@+id/btn_refresh"
         android:onClick="onListClick"
         android:background="@drawable/refresh"
         />
 
     <Button
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="@dimen/button_size"
+        android:layout_height="@dimen/button_size"
         android:id="@+id/btn_back"
         android:layout_alignParentLeft="true"
         android:onClick="onBackClick"
@@ -34,8 +34,8 @@
         />
 
     <Button
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="@dimen/button_size"
+        android:layout_height="@dimen/button_size"
         android:id="@+id/btn_home"
         android:onClick="onFilterClick"
         android:background="@drawable/home2"
